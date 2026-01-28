@@ -29,11 +29,11 @@ const sequelize = new Sequelize(
     pool: {
       max: 5,
       min: 0,
-      acquire: 30000, // Tiempo máximo para obtener conexión del pool
-      idle: 10000 // Tiempo máximo que una conexión puede estar idle
+      acquire: 30000,
+      idle: 10000
     },
     retry: {
-      max: 3 // Intentar reconectar hasta 3 veces
+      max: 3
     }
   }
 );
