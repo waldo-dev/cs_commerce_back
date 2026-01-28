@@ -3,10 +3,6 @@
 const { verifyToken, extractTokenFromHeader } = require('../utils/jwt');
 const db = require('../models');
 
-/**
- * Middleware de autenticación
- * Verifica que el usuario tenga un token válido
- */
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -19,10 +15,7 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Verificar y decodificar el token
     const decoded = verifyToken(token);
-
-    // Buscar el usuario en la base de datos
     const user = await db.User.findByPk(decoded.id, {
       attributes: { exclude: ['password'] },
       include: [{
@@ -38,7 +31,6 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Agregar información del usuario al request
     req.user = user;
     req.userId = user.id;
     req.companyId = user.company_id;
@@ -53,11 +45,6 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-/**
- * Middleware de autorización por roles
- * Verifica que el usuario tenga uno de los roles permitidos
- * @param {...string} allowedRoles - Roles permitidos
- */
 const authorize = (...allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -78,10 +65,6 @@ const authorize = (...allowedRoles) => {
   };
 };
 
-/**
- * Middleware opcional de autenticación
- * No falla si no hay token, pero agrega el usuario si existe
- */
 const optionalAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -105,7 +88,6 @@ const optionalAuth = async (req, res, next) => {
       }
     }
   } catch (error) {
-    // Ignorar errores en autenticación opcional
   }
 
   next();
@@ -116,6 +98,4 @@ module.exports = {
   authorize,
   optionalAuth
 };
-
-
 

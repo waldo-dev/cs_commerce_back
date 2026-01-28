@@ -46,5 +46,3 @@ module.exports = (sequelize, DataTypes) => {
   return AnalyticsEvent;
 };
 
-
-

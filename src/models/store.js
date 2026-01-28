@@ -28,6 +28,16 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'store_id',
         onDelete: 'CASCADE'
       });
+      Store.belongsToMany(models.User, {
+        through: models.UserStore,
+        foreignKey: 'store_id',
+        otherKey: 'user_id',
+        as: 'users'
+      });
+      Store.hasMany(models.UserStore, {
+        foreignKey: 'store_id',
+        as: 'userStores'
+      });
     }
   }
   Store.init({
@@ -69,6 +79,4 @@ module.exports = (sequelize, DataTypes) => {
   });
   return Store;
 };
-
-
 

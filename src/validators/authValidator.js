@@ -1,24 +1,14 @@
 'use strict';
 
-/**
- * Valida el formato de email
- */
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
-/**
- * Valida la fortaleza de la contraseña
- * Mínimo 6 caracteres
- */
 const isValidPassword = (password) => {
   return password && password.length >= 6;
 };
 
-/**
- * Valida los datos de registro
- */
 const validateRegister = (req, res, next) => {
   const { name, email, password, company_id } = req.body;
   const errors = [];
@@ -50,9 +40,6 @@ const validateRegister = (req, res, next) => {
   next();
 };
 
-/**
- * Valida los datos de login
- */
 const validateLogin = (req, res, next) => {
   const { email, password } = req.body;
   const errors = [];
@@ -76,9 +63,6 @@ const validateLogin = (req, res, next) => {
   next();
 };
 
-/**
- * Valida el cambio de contraseña
- */
 const validateChangePassword = (req, res, next) => {
   const { currentPassword, newPassword } = req.body;
   const errors = [];
@@ -109,6 +93,4 @@ module.exports = {
   isValidEmail,
   isValidPassword
 };
-
-
 

@@ -3,14 +3,10 @@
 const db = require('../models');
 const { generateToken } = require('../utils/jwt');
 
-/**
- * Registra un nuevo usuario
- */
 const register = async (req, res) => {
   try {
     const { name, email, password, company_id, role } = req.body;
 
-    // Verificar si el email ya existe
     const existingUser = await db.User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({
@@ -19,7 +15,6 @@ const register = async (req, res) => {
       });
     }
 
-    // Verificar si la compañía existe
     const company = await db.Company.findByPk(company_id);
     if (!company) {
       return res.status(400).json({
@@ -28,16 +23,14 @@ const register = async (req, res) => {
       });
     }
 
-    // Crear el usuario
     const user = await db.User.create({
       name,
       email,
       password,
       company_id,
-      role: role || 'admin'
+      role: role || 'cliente'
     });
 
-    // Obtener el usuario con la compañía (sin la contraseña)
     const userWithCompany = await db.User.findByPk(user.id, {
       attributes: { exclude: ['password'] },
       include: [{
@@ -46,7 +39,6 @@ const register = async (req, res) => {
       }]
     });
 
-    // Generar token
     const token = generateToken({
       id: user.id,
       email: user.email,
@@ -72,14 +64,10 @@ const register = async (req, res) => {
   }
 };
 
-/**
- * Inicia sesión de un usuario
- */
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Buscar el usuario por email
     const user = await db.User.findOne({
       where: { email },
       include: [{
@@ -95,7 +83,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Verificar la contraseña
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -104,7 +91,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Generar token
     const token = generateToken({
       id: user.id,
       email: user.email,
@@ -112,7 +98,6 @@ const login = async (req, res) => {
       company_id: user.company_id
     });
 
-    // Preparar datos del usuario (sin contraseña)
     const userData = user.toJSON();
     delete userData.password;
 
@@ -134,9 +119,6 @@ const login = async (req, res) => {
   }
 };
 
-/**
- * Obtiene el perfil del usuario autenticado
- */
 const getProfile = async (req, res) => {
   try {
     const user = await db.User.findByPk(req.userId, {
@@ -168,9 +150,6 @@ const getProfile = async (req, res) => {
   }
 };
 
-/**
- * Actualiza el perfil del usuario autenticado
- */
 const updateProfile = async (req, res) => {
   try {
     const { name, email } = req.body;
@@ -183,7 +162,6 @@ const updateProfile = async (req, res) => {
       });
     }
 
-    // Verificar si el nuevo email ya existe (si se está cambiando)
     if (email && email !== user.email) {
       const existingUser = await db.User.findOne({ where: { email } });
       if (existingUser) {
@@ -194,13 +172,11 @@ const updateProfile = async (req, res) => {
       }
     }
 
-    // Actualizar campos
     if (name) user.name = name;
     if (email) user.email = email;
 
     await user.save();
 
-    // Obtener usuario actualizado (sin contraseña)
     const updatedUser = await db.User.findByPk(user.id, {
       attributes: { exclude: ['password'] },
       include: [{
@@ -224,9 +200,6 @@ const updateProfile = async (req, res) => {
   }
 };
 
-/**
- * Cambia la contraseña del usuario autenticado
- */
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -239,7 +212,6 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Verificar la contraseña actual
     const isPasswordValid = await user.comparePassword(currentPassword);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -248,7 +220,6 @@ const changePassword = async (req, res) => {
       });
     }
 
-    // Actualizar la contraseña (el hook beforeUpdate se encargará del hash)
     user.password = newPassword;
     await user.save();
 
@@ -266,12 +237,8 @@ const changePassword = async (req, res) => {
   }
 };
 
-/**
- * Verifica si un token es válido
- */
 const verifyToken = async (req, res) => {
   try {
-    // Si llegamos aquí, el middleware authenticate ya validó el token
     res.json({
       success: true,
       message: 'Token válido',
@@ -296,6 +263,4 @@ module.exports = {
   changePassword,
   verifyToken
 };
-
-
 

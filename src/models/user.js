@@ -9,20 +9,22 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'company_id',
         onDelete: 'CASCADE'
       });
+      User.belongsToMany(models.Store, {
+        through: models.UserStore,
+        foreignKey: 'user_id',
+        otherKey: 'store_id',
+        as: 'stores'
+      });
+      User.hasMany(models.UserStore, {
+        foreignKey: 'user_id',
+        as: 'userStores'
+      });
     }
 
-    /**
-     * Compara una contraseña con el hash almacenado
-     * @param {string} password - Contraseña a comparar
-     * @returns {Promise<boolean>} True si la contraseña coincide
-     */
     async comparePassword(password) {
       return await bcrypt.compare(password, this.password);
     }
 
-    /**
-     * Genera un hash de la contraseña antes de guardar
-     */
     static async hashPassword(password) {
       const saltRounds = 10;
       return await bcrypt.hash(password, saltRounds);
@@ -57,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     role: {
       type: DataTypes.STRING(40),
-      defaultValue: 'admin'
+      defaultValue: 'cliente'
     },
     created_at: {
       type: DataTypes.DATE,
